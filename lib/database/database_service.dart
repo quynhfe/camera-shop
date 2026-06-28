@@ -9,6 +9,9 @@ import '../models/order.dart';
 import '../models/address.dart';
 import '../models/payment_method.dart';
 import '../models/cart_item.dart';
+import '../models/app_notification.dart';
+import '../models/store_location.dart';
+import '../models/chat_message.dart';
 
 class DatabaseService {
   static DatabaseService? _instance;
@@ -42,7 +45,14 @@ class DatabaseService {
       }
       path = join(await getDatabasesPath(), 'popishop.db');
     }
-    return openDatabase(path, version: 1, onCreate: _onCreate);
+    return openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createExtendedTables(db);
+      await _seedExtendedData(db);
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -144,7 +154,116 @@ class DatabaseService {
       )
     ''');
 
+    await _createExtendedTables(db);
     await _seedData(db);
+    await _seedExtendedData(db);
+  }
+
+  Future<void> _createExtendedTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        type TEXT DEFAULT 'system',
+        is_read INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS stores (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        address TEXT NOT NULL,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL,
+        phone TEXT,
+        hours TEXT,
+        is_active INTEGER DEFAULT 1
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        is_from_user INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    ''');
+  }
+
+  Future<void> _seedExtendedData(Database db) async {
+    final storeCount = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM stores'),
+    );
+    if ((storeCount ?? 0) == 0) {
+      final stores = [
+        {
+          'name': 'PopiDigicam Hanoi',
+          'address': '12 Hang Bai, Hoan Kiem, Hanoi',
+          'latitude': 21.0285,
+          'longitude': 105.8542,
+          'phone': '+84 24 3825 1234',
+          'hours': 'Mon–Sat 9:00–21:00',
+        },
+        {
+          'name': 'PopiDigicam Ho Chi Minh',
+          'address': '45 Nguyen Hue, District 1, Ho Chi Minh City',
+          'latitude': 10.7769,
+          'longitude': 106.7009,
+          'phone': '+84 28 3822 5678',
+          'hours': 'Mon–Sun 9:00–22:00',
+        },
+        {
+          'name': 'PopiDigicam Da Nang',
+          'address': '88 Bach Dang, Hai Chau, Da Nang',
+          'latitude': 16.0544,
+          'longitude': 108.2022,
+          'phone': '+84 236 388 9012',
+          'hours': 'Mon–Sat 9:00–20:00',
+        },
+      ];
+      for (final store in stores) {
+        await db.insert('stores', store);
+      }
+    }
+
+    final user = await db.query('users', where: 'email = ?', whereArgs: ['user@gmail.com']);
+    if (user.isNotEmpty) {
+      final userId = user.first['id'] as int;
+      final notifCount = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM notifications WHERE user_id = ?', [userId]),
+      );
+      if ((notifCount ?? 0) == 0) {
+        await db.insert('notifications', {
+          'user_id': userId,
+          'title': 'Welcome to PopiDigicam!',
+          'body': 'Explore our latest digital cameras and exclusive deals.',
+          'type': 'system',
+        });
+        await db.insert('notifications', {
+          'user_id': userId,
+          'title': 'Flash Sale!',
+          'body': 'Up to 40% off on selected cameras today only!',
+          'type': 'promo',
+        });
+      }
+
+      final msgCount = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM messages WHERE user_id = ?', [userId]),
+      );
+      if ((msgCount ?? 0) == 0) {
+        await db.insert('messages', {
+          'user_id': userId,
+          'content': 'Hi! Welcome to PopiDigicam Support. How can we help you today?',
+          'is_from_user': 0,
+        });
+      }
+    }
   }
 
   Future<void> _seedData(Database db) async {
@@ -296,6 +415,17 @@ class DatabaseService {
       'password': password,
       'role': 'user',
     });
+    await addNotification(
+      userId: id,
+      title: 'Welcome to PopiDigicam!',
+      body: 'Thanks for joining! Start exploring our camera collection.',
+      type: 'system',
+    );
+    await sendMessage(
+      userId: id,
+      content: 'Hi $name! Welcome to PopiDigicam Support. How can we help you today?',
+      isFromUser: false,
+    );
     return (await getUserById(id))!;
   }
 
@@ -441,17 +571,59 @@ class DatabaseService {
         'price': item['price'],
       });
     }
+    await addNotification(
+      userId: userId,
+      title: 'Order Placed!',
+      body: 'Your order ORD-${orderId.toString().padLeft(4, '0')} has been placed successfully.',
+      type: 'order',
+    );
     return orderId;
   }
 
   Future<void> updateOrderStatus(int orderId, String status) async {
     final database = await db;
+    final order = await getOrderById(orderId);
     await database.update(
       'orders',
       {'status': status},
       where: 'id = ?',
       whereArgs: [orderId],
     );
+    if (order != null) {
+      await _notifyOrderStatusChange(order.userId, orderId, status);
+    }
+  }
+
+  Future<void> _notifyOrderStatusChange(int userId, int orderId, String status) async {
+    final orderLabel = 'ORD-${orderId.toString().padLeft(4, '0')}';
+    String title;
+    String body;
+    switch (status) {
+      case 'Processing':
+        title = 'Order Processing';
+        body = 'Your order $orderLabel is being processed.';
+        break;
+      case 'Shipped':
+        title = 'Order Shipped!';
+        body = 'Your order $orderLabel has been shipped.';
+        break;
+      case 'Delivered':
+        title = 'Order Delivered';
+        body = 'Your order $orderLabel has been delivered.';
+        break;
+      case 'Completed':
+        title = 'Order Completed';
+        body = 'Your order $orderLabel is complete. Thank you for shopping!';
+        break;
+      case 'Cancelled':
+        title = 'Order Cancelled';
+        body = 'Your order $orderLabel has been cancelled.';
+        break;
+      default:
+        title = 'Order Updated';
+        body = 'Your order $orderLabel status is now $status.';
+    }
+    await addNotification(userId: userId, title: title, body: body, type: 'order');
   }
 
   Future<Map<String, dynamic>> getRevenueStats() async {
@@ -674,5 +846,114 @@ class DatabaseService {
       where: 'user_id = ?',
       whereArgs: [userId],
     );
+  }
+
+  // ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+
+  Future<List<AppNotification>> getNotificationsByUser(int userId) async {
+    final database = await db;
+    final result = await database.query(
+      'notifications',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+    return result.map((m) => AppNotification.fromMap(m)).toList();
+  }
+
+  Future<int> getUnreadNotificationCount(int userId) async {
+    final database = await db;
+    final result = await database.rawQuery(
+      'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0',
+      [userId],
+    );
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  Future<void> addNotification({
+    required int userId,
+    required String title,
+    required String body,
+    String type = 'system',
+  }) async {
+    final database = await db;
+    await database.insert('notifications', {
+      'user_id': userId,
+      'title': title,
+      'body': body,
+      'type': type,
+    });
+  }
+
+  Future<void> markNotificationRead(int id) async {
+    final database = await db;
+    await database.update(
+      'notifications',
+      {'is_read': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> markAllNotificationsRead(int userId) async {
+    final database = await db;
+    await database.update(
+      'notifications',
+      {'is_read': 1},
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  // ─── STORES ──────────────────────────────────────────────────────────────────
+
+  Future<List<StoreLocation>> getAllStores() async {
+    final database = await db;
+    final result = await database.query(
+      'stores',
+      where: 'is_active = ?',
+      whereArgs: [1],
+      orderBy: 'name ASC',
+    );
+    return result.map((m) => StoreLocation.fromMap(m)).toList();
+  }
+
+  Future<StoreLocation?> getStoreById(int id) async {
+    final database = await db;
+    final result = await database.query(
+      'stores',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (result.isEmpty) return null;
+    return StoreLocation.fromMap(result.first);
+  }
+
+  // ─── MESSAGES ────────────────────────────────────────────────────────────────
+
+  Future<List<ChatMessage>> getMessagesByUser(int userId) async {
+    final database = await db;
+    final result = await database.query(
+      'messages',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'created_at ASC',
+    );
+    return result.map((m) => ChatMessage.fromMap(m)).toList();
+  }
+
+  Future<ChatMessage> sendMessage({
+    required int userId,
+    required String content,
+    required bool isFromUser,
+  }) async {
+    final database = await db;
+    final id = await database.insert('messages', {
+      'user_id': userId,
+      'content': content,
+      'is_from_user': isFromUser ? 1 : 0,
+    });
+    final result = await database.query('messages', where: 'id = ?', whereArgs: [id]);
+    return ChatMessage.fromMap(result.first);
   }
 }

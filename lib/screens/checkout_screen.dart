@@ -5,6 +5,7 @@ import '../models/address.dart';
 import '../models/payment_method.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/notification_provider.dart';
 import '../providers/toast_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -71,6 +72,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
       await cart.clearCart();
       if (mounted) {
+        context.read<NotificationProvider>().loadNotifications();
         context.read<ToastProvider>().success('Order placed successfully!');
         Navigator.pushReplacementNamed(context, '/order-success');
       }

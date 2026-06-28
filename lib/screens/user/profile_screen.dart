@@ -53,6 +53,8 @@ class ProfileScreen extends StatelessWidget {
             ]),
             const SizedBox(height: 16),
             _buildSection('Support', [
+              _MenuItem(Icons.map_outlined, 'Store Locations', () => Navigator.pushNamed(context, '/store-map')),
+              _MenuItem(Icons.chat_bubble_outline, 'Chat Support', () => Navigator.pushNamed(context, '/chat')),
               _MenuItem(Icons.settings_outlined, 'Settings', () {}),
               _MenuItem(Icons.help_outline, 'Help Center', () {}),
             ]),

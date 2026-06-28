@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/wishlist_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/chat_provider.dart';
 import 'providers/toast_provider.dart';
 import 'theme/app_theme.dart';
 import 'widgets/toast_overlay.dart';
@@ -17,6 +19,8 @@ import 'screens/checkout_screen.dart';
 import 'screens/order_detail_screen.dart';
 import 'screens/order_success_screen.dart';
 import 'screens/notifications_screen.dart';
+import 'screens/store_map_screen.dart';
+import 'screens/chat_screen.dart';
 import 'screens/wishlist_screen.dart';
 import 'screens/edit_profile_screen.dart';
 import 'screens/payment_methods_screen.dart';
@@ -41,12 +45,17 @@ class PopiDigicamApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
-      child: Consumer3<AuthProvider, CartProvider, WishlistProvider>(
-        builder: (context, auth, cart, wishlist, _) {
+      child: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
           if (!auth.isLoading) {
-            cart.setUser(auth.user?.id);
-            wishlist.setUser(auth.user?.id);
+            final userId = auth.user?.id;
+            context.read<CartProvider>().setUser(userId);
+            context.read<WishlistProvider>().setUser(userId);
+            context.read<NotificationProvider>().setUser(userId);
+            context.read<ChatProvider>().setUser(userId);
           }
           return const _App();
         },
@@ -115,6 +124,10 @@ class _App extends StatelessWidget {
         return MaterialPageRoute(builder: (_) => const OrderSuccessScreen());
       case '/notifications':
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());
+      case '/store-map':
+        return MaterialPageRoute(builder: (_) => const StoreMapScreen());
+      case '/chat':
+        return MaterialPageRoute(builder: (_) => const ChatScreen());
       case '/wishlist':
         return MaterialPageRoute(builder: (_) => const WishlistScreen());
       case '/edit-profile':

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../database/database_service.dart';
 import '../../models/order.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../providers/toast_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/confirm_dialog.dart';
@@ -147,6 +148,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       final confirm = await showConfirmDialog(context, title: 'Cancel Order', message: 'Cancel order ${order.orderId}?', destructive: true);
                       if (confirm == true) {
                         await DatabaseService.instance.updateOrderStatus(order.id, 'Cancelled');
+                        context.read<NotificationProvider>().loadNotifications();
                         context.read<ToastProvider>().success('Order cancelled');
                         _loadOrders();
                       }
@@ -160,6 +162,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       await DatabaseService.instance.updateOrderStatus(order.id, 'Completed');
+                      context.read<NotificationProvider>().loadNotifications();
                       context.read<ToastProvider>().success('Order confirmed');
                       _loadOrders();
                     },
