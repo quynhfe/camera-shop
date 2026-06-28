@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_notification.dart';
 import '../providers/notification_provider.dart';
@@ -62,7 +62,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final notifications = context.watch<NotificationProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: const Text('Notifications', style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.white,
@@ -182,3 +182,4 @@ class _NotificationTile extends StatelessWidget {
     );
   }
 }
+

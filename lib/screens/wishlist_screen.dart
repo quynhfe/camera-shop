@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../theme/app_theme.dart';
@@ -12,7 +12,7 @@ class WishlistScreen extends StatelessWidget {
     final wishlist = context.watch<WishlistProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text('Wishlist (${wishlist.count})', style: const TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.white,
@@ -22,19 +22,22 @@ class WishlistScreen extends StatelessWidget {
       body: wishlist.items.isEmpty
           ? Center(
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.favorite_border, size: 64, color: Color(0xFF9CA3AF)),
+                const Icon(Icons.favorite_border, size: 64, color: AppColors.inactive),
                 const SizedBox(height: 16),
-                const Text('Your wishlist is empty', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF374151))),
+                const Text('Your wishlist is empty', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.dark)),
                 const SizedBox(height: 8),
-                const Text('Save items you love here', style: TextStyle(color: Color(0xFF6B7280))),
+                const Text('Save items you love here', style: TextStyle(color: AppColors.textMid)),
                 const SizedBox(height: 24),
                 ElevatedButton(onPressed: () => Navigator.pushNamed(context, '/explore'), child: const Text('Explore Products')),
               ]),
             )
           : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 0.67,
+              padding: EdgeInsets.fromLTRB(AppResponsive.hp(context), AppResponsive.hp(context), AppResponsive.hp(context), AppResponsive.bottomInset(context)),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: AppResponsive.gridColumns(context),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: AppResponsive.gridAspectRatio(context),
               ),
               itemCount: wishlist.items.length,
               itemBuilder: (context, i) => ProductCard(product: wishlist.items[i]),
@@ -42,3 +45,4 @@ class WishlistScreen extends StatelessWidget {
     );
   }
 }
+

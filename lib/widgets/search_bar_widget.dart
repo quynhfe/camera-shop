@@ -20,17 +20,16 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48,
+      height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Icon(Icons.search, color: Color(0xFF9CA3AF), size: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 13),
+            child: Icon(Icons.search_rounded, color: AppColors.primary, size: 21),
           ),
           Expanded(
             child: TextField(
@@ -38,20 +37,20 @@ class SearchBarWidget extends StatelessWidget {
               onSubmitted: onSubmit,
               decoration: InputDecoration(
                 hintText: placeholder,
-                hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+                hintStyle: const TextStyle(color: AppColors.inactive, fontSize: 14),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
               ),
-              style: const TextStyle(fontSize: 14, color: Color(0xFF111827)),
+              style: const TextStyle(fontSize: 14, color: AppColors.dark),
             ),
           ),
           if (controller.text.isNotEmpty)
             GestureDetector(
               onTap: () => controller.clear(),
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Icon(Icons.close, color: Color(0xFF9CA3AF), size: 18),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(Icons.close_rounded, color: AppColors.inactive, size: 18),
               ),
             ),
           if (onFilterPress != null)
@@ -59,12 +58,16 @@ class SearchBarWidget extends StatelessWidget {
               onTap: onFilterPress,
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: hasActiveFilters ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
+                  color: hasActiveFilters ? AppColors.primaryXLight : AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.tune, color: hasActiveFilters ? AppColors.primary : const Color(0xFF6B7280), size: 20),
+                child: Icon(
+                  Icons.tune_rounded,
+                  color: hasActiveFilters ? AppColors.primary : AppColors.textMid,
+                  size: 20,
+                ),
               ),
             ),
         ],

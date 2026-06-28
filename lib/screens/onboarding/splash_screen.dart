@@ -40,68 +40,117 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Stack(
-        children: [
-          Positioned(top: -80, right: -60, child: _blurCircle(300, Colors.white.withOpacity(0.07))),
-          Positioned(bottom: -100, left: -80, child: _blurCircle(350, Colors.white.withOpacity(0.05))),
-          Center(
-            child: FadeTransition(
-              opacity: _opacity,
-              child: ScaleTransition(
-                scale: _scale,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 120, height: 120,
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                      child: const Icon(Icons.camera_alt, color: AppColors.primary, size: 60),
-                    ),
-                    const SizedBox(height: 24),
-                    RichText(
-                      text: const TextSpan(
-                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
-                        children: [
-                          TextSpan(text: 'Popi', style: TextStyle(color: Colors.white)),
-                          TextSpan(text: 'Di', style: TextStyle(color: AppColors.coral)),
-                          TextSpan(text: 'gi', style: TextStyle(color: AppColors.yellow)),
-                          TextSpan(text: 'cam', style: TextStyle(color: Colors.white)),
-                        ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFF6B9D), Color(0xFFFF9A5C)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Background circles
+            Positioned(top: -80, right: -60, child: _blurCircle(300, Colors.white.withValues(alpha: 0.08))),
+            Positioned(bottom: -100, left: -80, child: _blurCircle(350, Colors.white.withValues(alpha: 0.06))),
+            Positioned(top: 120, left: 30, child: _blurCircle(80, Colors.white.withValues(alpha: 0.1))),
+            Positioned(bottom: 200, right: 40, child: _blurCircle(60, Colors.white.withValues(alpha: 0.12))),
+            // Dot patterns
+            Positioned(top: 80, right: 40, child: _dotPattern(4, 4, Colors.white.withValues(alpha: 0.15))),
+            Positioned(bottom: 100, left: 30, child: _dotPattern(3, 3, Colors.white.withValues(alpha: 0.12))),
+            // Main content
+            Center(
+              child: FadeTransition(
+                opacity: _opacity,
+                child: ScaleTransition(
+                  scale: _scale,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Camera icon in white circle
+                      Container(
+                        width: 120, height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 30,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary, size: 58),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text('Your Camera Shop', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                    const SizedBox(height: 48),
-                    SizedBox(
-                      width: 200,
-                      child: AnimatedBuilder(
-                        animation: _progressCtrl,
-                        builder: (context, _) => ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: _progressCtrl.value,
-                            backgroundColor: Colors.white30,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.coral),
-                            minHeight: 6,
+                      const SizedBox(height: 28),
+                      // Brand name
+                      RichText(
+                        text: const TextSpan(
+                          style: TextStyle(fontFamily: 'Roboto', fontSize: 36, fontWeight: FontWeight.w900),
+                          children: [
+                            TextSpan(text: 'Popi', style: TextStyle(color: Colors.white)),
+                            TextSpan(text: 'Di', style: TextStyle(color: Color(0xFFFFF0A0))),
+                            TextSpan(text: 'gi', style: TextStyle(color: Color(0xFFFFE0CC))),
+                            TextSpan(text: 'cam', style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Your Camera Shop ✨',
+                        style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 52),
+                      // Progress bar
+                      SizedBox(
+                        width: 200,
+                        child: AnimatedBuilder(
+                          animation: _progressCtrl,
+                          builder: (context, _) => ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: LinearProgressIndicator(
+                              value: _progressCtrl.value,
+                              backgroundColor: Colors.white30,
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              minHeight: 5,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _blurCircle(double size, Color color) {
-    return Container(
-      width: size, height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  Widget _blurCircle(double size, Color color) => Container(
+        width: size, height: size,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      );
+
+  Widget _dotPattern(int rows, int cols, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        rows,
+        (_) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(
+            cols,
+            (_) => Container(
+              width: 4, height: 4,
+              margin: const EdgeInsets.all(3),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

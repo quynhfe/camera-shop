@@ -139,7 +139,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.bgLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -148,7 +148,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Explore', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF111827))),
+                  const Text('Explore 🔍', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark, letterSpacing: -0.3)),
                   const SizedBox(height: 12),
                   SearchBarWidget(
                     controller: _searchCtrl,
@@ -170,13 +170,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildBrowse() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, AppResponsive.bottomInset(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_recentSearches.isNotEmpty) ...[
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text('Recent Searches', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+              const Text('Recent Searches', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
               TextButton(
                 onPressed: () async {
                   final prefs = await SharedPreferences.getInstance();
@@ -193,21 +193,21 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 onTap: () { _searchCtrl.text = s; _performSearch(s); },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFE5E7EB))),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFEED8E8), width: 1.5)),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.history, size: 14, color: Color(0xFF9CA3AF)),
+                    const Icon(Icons.history, size: 14, color: AppColors.inactive),
                     const SizedBox(width: 4),
-                    Text(s, style: const TextStyle(fontSize: 13, color: Color(0xFF374151))),
+                    Text(s, style: const TextStyle(fontSize: 13, color: AppColors.darkSecondary)),
                   ]),
                 ),
               )).toList(),
             ),
             const SizedBox(height: 24),
           ],
-          const Text('Categories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF111827))),
+          const Text('Categories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.dark)),
           const SizedBox(height: 12),
           GridView.count(
-            crossAxisCount: 4,
+            crossAxisCount: AppResponsive.categoryColumns(context),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12,
@@ -220,11 +220,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 child: Column(children: [
                   Container(
                     width: 56, height: 56,
-                    decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
+                    decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(16)),
                     child: Icon(Icons.camera_alt_outlined, color: color, size: 28),
                   ),
                   const SizedBox(height: 6),
-                  Text(cat['label'] as String, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+                  Text(cat['label'] as String, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.darkSecondary)),
                 ]),
               );
             }).toList(),
@@ -238,16 +238,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
     if (_results.isEmpty) {
       return Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.search_off, size: 64, color: Color(0xFF9CA3AF)),
+          const Icon(Icons.search_off, size: 64, color: AppColors.inactive),
           const SizedBox(height: 16),
-          Text('No results for "${_searchCtrl.text}"', style: const TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
+          Text('No results for "${_searchCtrl.text}"', style: const TextStyle(fontSize: 16, color: AppColors.textMid)),
         ]),
       );
     }
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 0.67,
+      padding: EdgeInsets.fromLTRB(AppResponsive.hp(context), AppResponsive.hp(context), AppResponsive.hp(context), AppResponsive.bottomInset(context)),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: AppResponsive.gridColumns(context),
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: AppResponsive.gridAspectRatio(context),
       ),
       itemCount: _results.length,
       itemBuilder: (context, i) => ProductCard(product: _results[i]),
@@ -293,7 +296,7 @@ class _FilterSheetState extends State<_FilterSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(color: Color(0xFFF5F3EE), borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      decoration: const BoxDecoration(color: AppColors.bgLight, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       child: Column(
         children: [
           const SizedBox(height: 12),
@@ -325,9 +328,9 @@ class _FilterSheetState extends State<_FilterSheet> {
                         decoration: BoxDecoration(
                           color: active ? AppColors.primary : Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: active ? AppColors.primary : const Color(0xFFE5E7EB)),
+                          border: Border.all(color: active ? AppColors.primary : const Color(0xFFEED8E8), width: 1.5),
                         ),
-                        child: Text(cat, style: TextStyle(color: active ? Colors.white : const Color(0xFF374151), fontSize: 13, fontWeight: FontWeight.w500)),
+                        child: Text(cat, style: TextStyle(color: active ? Colors.white : AppColors.darkSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
                       ),
                     );
                   }).toList(),
@@ -339,7 +342,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   values: RangeValues(_min, _max),
                   min: 0, max: 1000,
                   activeColor: AppColors.primary,
-                  inactiveColor: const Color(0xFFE5E7EB),
+                  inactiveColor: AppColors.primaryLight,
                   onChanged: (v) => setState(() { _min = v.start; _max = v.end; }),
                 ),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -361,7 +364,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                           color: e.value,
                           shape: BoxShape.circle,
                           border: Border.all(color: selected ? AppColors.primary : const Color(0xFFE5E7EB), width: selected ? 3 : 1),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],
                         ),
                         child: selected ? const Icon(Icons.check, size: 16, color: AppColors.primary) : null,
                       ),

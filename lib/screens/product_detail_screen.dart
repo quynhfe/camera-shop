@@ -36,7 +36,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_product == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: AppColors.bgLight,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
     }
     final p = _product!;
     final wishlist = context.watch<WishlistProvider>();
@@ -56,17 +59,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 leading: Padding(
                   padding: const EdgeInsets.all(8),
                   child: CircleAvatar(
-                    backgroundColor: Colors.white.withOpacity(0.9),
-                    child: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Color(0xFF111827)), onPressed: () => Navigator.pop(context)),
+                    backgroundColor: Colors.white,
+                    child: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.dark), onPressed: () => Navigator.pop(context)),
                   ),
                 ),
                 actions: [
                   Padding(
                     padding: const EdgeInsets.all(8),
                     child: CircleAvatar(
-                      backgroundColor: Colors.white.withOpacity(0.9),
+                      backgroundColor: Colors.white,
                       child: IconButton(
-                        icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border, size: 20, color: isSaved ? AppColors.savedHeart : const Color(0xFF374151)),
+                        icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border, size: 20, color: isSaved ? AppColors.savedHeart : AppColors.textMid),
                         onPressed: () {
                           final auth = context.read<AuthProvider>();
                           if (!auth.isAuthenticated) { context.read<ToastProvider>().warning('Please log in'); return; }
@@ -100,22 +103,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                        Expanded(child: Text(p.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF111827)))),
+                        Expanded(child: Text(p.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.dark, letterSpacing: -0.3))),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(8)),
-                          child: Text(p.brand, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF374151))),
+                          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(10)),
+                          child: Text(p.brand, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.darkSecondary)),
                         ),
                       ]),
                       const SizedBox(height: 8),
                       Row(children: [
                         const Icon(Icons.star, color: AppColors.yellow, size: 18),
                         const SizedBox(width: 4),
-                        Text('${p.rating} (${p.reviews} reviews)', style: const TextStyle(color: Color(0xFF6B7280), fontSize: 14)),
+                        Text('${p.rating} (${p.reviews} reviews)', style: const TextStyle(color: AppColors.textMid, fontSize: 14)),
                         const SizedBox(width: 16),
-                        const Icon(Icons.inventory_2_outlined, size: 16, color: Color(0xFF9CA3AF)),
+                        const Icon(Icons.inventory_2_outlined, size: 16, color: AppColors.inactive),
                         const SizedBox(width: 4),
-                        Text('${p.stock} in stock', style: const TextStyle(color: Color(0xFF6B7280), fontSize: 14)),
+                        Text('${p.stock} in stock', style: const TextStyle(color: AppColors.textMid, fontSize: 14)),
                       ]),
                       const SizedBox(height: 20),
                       const Text('Color', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
@@ -131,10 +134,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
                                 color: active ? AppColors.primary : Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: active ? AppColors.primary : const Color(0xFFE5E7EB)),
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(color: active ? AppColors.primary : const Color(0xFFEED8E8), width: 1.5),
                               ),
-                              child: Text(color, style: TextStyle(color: active ? Colors.white : const Color(0xFF374151), fontWeight: FontWeight.w500)),
+                              child: Text(color, style: TextStyle(color: active ? Colors.white : AppColors.darkSecondary, fontWeight: FontWeight.w500)),
                             ),
                           );
                         }).toList(),
@@ -142,7 +145,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const SizedBox(height: 20),
                       const Text('Description', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 8),
-                      Text(p.description, style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280), height: 1.7)),
+                      Text(p.description, style: const TextStyle(fontSize: 14, color: AppColors.textMid, height: 1.7)),
                     ],
                   ),
                 ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../database/database_service.dart';
 import '../../models/order.dart';
@@ -56,7 +56,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: const Text('My Orders', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
         backgroundColor: Colors.white,
@@ -101,7 +101,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 : RefreshIndicator(
                     onRefresh: _loadOrders,
                     child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, AppResponsive.bottomInset(context)),
                       itemCount: _filteredOrders.length,
                       itemBuilder: (context, i) => _buildOrderCard(_filteredOrders[i]),
                     ),
@@ -116,7 +116,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6)]),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -148,6 +148,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       final confirm = await showConfirmDialog(context, title: 'Cancel Order', message: 'Cancel order ${order.orderId}?', destructive: true);
                       if (confirm == true) {
                         await DatabaseService.instance.updateOrderStatus(order.id, 'Cancelled');
+                        if (!mounted) return;
                         context.read<NotificationProvider>().loadNotifications();
                         context.read<ToastProvider>().success('Order cancelled');
                         _loadOrders();
@@ -162,6 +163,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       await DatabaseService.instance.updateOrderStatus(order.id, 'Completed');
+                      if (!mounted) return;
                       context.read<NotificationProvider>().loadNotifications();
                       context.read<ToastProvider>().success('Order confirmed');
                       _loadOrders();
@@ -195,3 +197,4 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 }
+

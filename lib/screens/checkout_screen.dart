@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../database/database_service.dart';
 import '../models/address.dart';
@@ -90,7 +90,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final total = subtotal + _shipping + taxAmount;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: const Text('Checkout', style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.white,
@@ -136,7 +136,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6)]),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)]),
               child: Column(children: [
                 ...cart.items.map((item) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -303,3 +303,4 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 }
+

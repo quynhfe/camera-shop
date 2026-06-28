@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class TopAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -29,31 +30,47 @@ class TopAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0,
       leading: showBack
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF111827), size: 20),
+              icon: Container(
+                width: 34, height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.arrow_back_ios_new, color: AppColors.dark, size: 16),
+              ),
               onPressed: onBack ?? () => Navigator.pop(context),
             )
           : null,
       title: title != null
-          ? Text(title!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF111827)))
+          ? Text(
+              title!,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.dark,
+                letterSpacing: -0.3,
+              ),
+            )
           : null,
       actions: [
         if (showNotification)
           Stack(
+            alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Color(0xFF374151)),
+                icon: const Icon(Icons.notifications_outlined, color: AppColors.dark),
                 onPressed: () => Navigator.pushNamed(context, '/notifications'),
               ),
               Positioned(
                 top: 10, right: 10,
                 child: Container(
                   width: 8, height: 8,
-                  decoration: const BoxDecoration(color: Color(0xFFFF6B6B), shape: BoxShape.circle),
+                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                 ),
               ),
             ],
           ),
-        if (rightAction != null) rightAction!,
+        ?rightAction,
       ],
     );
   }

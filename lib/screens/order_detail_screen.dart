@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../database/database_service.dart';
 import '../models/order.dart';
@@ -38,7 +38,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final stepIndex = _statusMap[o.status] ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(o.orderId, style: const TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.white,
@@ -97,6 +97,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     await DatabaseService.instance.updateOrderStatus(o.id, 'Completed');
+                    if (!mounted) return;
                     context.read<ToastProvider>().success('Order confirmed received');
                     _loadOrder();
                   },
@@ -115,7 +116,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget _statusCard(Order o, int stepIndex) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6)]),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -125,30 +126,62 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ]),
           const SizedBox(height: 20),
           if (o.status != 'Cancelled')
-            Row(
-              children: List.generate(_statusSteps.length * 2 - 1, (i) {
-                if (i.isOdd) {
-                  final lineActive = stepIndex > i ~/ 2;
-                  return Expanded(child: Container(height: 3, color: lineActive ? AppColors.primary : const Color(0xFFE5E7EB)));
-                }
-                final idx = i ~/ 2;
-                final done = stepIndex >= idx;
-                return Column(children: [
-                  Container(
-                    width: 28, height: 28,
-                    decoration: BoxDecoration(
-                      color: done ? AppColors.primary : const Color(0xFFE5E7EB),
-                      shape: BoxShape.circle,
+            LayoutBuilder(
+              builder: (ctx, box) {
+                final stepW = box.maxWidth / _statusSteps.length;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // connector lines sit at circle midpoint
+                    Positioned(
+                      top: 13,
+                      left: stepW / 2,
+                      right: stepW / 2,
+                      child: Row(
+                        children: List.generate(_statusSteps.length - 1, (i) {
+                          final lineActive = stepIndex > i;
+                          return Expanded(
+                            child: Container(
+                              height: 3,
+                              color: lineActive ? AppColors.primary : const Color(0xFFE5E7EB),
+                            ),
+                          );
+                        }),
+                      ),
                     ),
-                    child: done ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: 56,
-                    child: Text(_statusSteps[idx], textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: done ? AppColors.primary : const Color(0xFF9CA3AF), fontWeight: FontWeight.w500)),
-                  ),
-                ]);
-              }),
+                    Row(
+                      children: List.generate(_statusSteps.length, (idx) {
+                        final done = stepIndex >= idx;
+                        return SizedBox(
+                          width: stepW,
+                          child: Column(children: [
+                            Container(
+                              width: 26, height: 26,
+                              decoration: BoxDecoration(
+                                color: done ? AppColors.primary : const Color(0xFFE5E7EB),
+                                shape: BoxShape.circle,
+                              ),
+                              child: done ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _statusSteps[idx],
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                color: done ? AppColors.primary : const Color(0xFF9CA3AF),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ]),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
             )
           else
             Container(
@@ -169,7 +202,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6)]),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6)]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: Color(0xFF111827))),
         const SizedBox(height: 12),
@@ -214,3 +247,4 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 }
+

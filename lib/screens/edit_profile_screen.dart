@@ -45,7 +45,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 children: [
                   Container(
                     width: 96, height: 96,
-                    decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
                     child: const Icon(Icons.person, size: 48, color: AppColors.primary),
                   ),
                   Positioned(
