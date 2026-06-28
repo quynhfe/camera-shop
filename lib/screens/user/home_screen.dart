@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../database/database_service.dart';
 import '../../models/product.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/image_utils.dart';
 import '../../widgets/product_card.dart';
@@ -48,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final unread = context.watch<NotificationProvider>().unreadCount;
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
@@ -55,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onRefresh: _loadProducts,
           child: CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader(user?.name ?? 'there')),
+              SliverToBoxAdapter(child: _buildHeader(user?.name ?? 'there', unread)),
               SliverToBoxAdapter(child: _buildSearchBar()),
               SliverToBoxAdapter(child: _buildBanner()),
               if (_saleProducts.isNotEmpty) ...[
@@ -86,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHeader(String name) {
+  Widget _buildHeader(String name, int unread) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 16, 8),
       child: Row(
@@ -104,7 +106,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: const Icon(Icons.notifications_outlined, color: Color(0xFF374151)),
                     onPressed: () => Navigator.pushNamed(context, '/notifications'),
                   ),
-                  Positioned(top: 10, right: 10, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.coral, shape: BoxShape.circle))),
+                  if (unread > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(color: AppColors.coral, shape: BoxShape.circle),
+                        child: Text(
+                          unread > 9 ? '9+' : '$unread',
+                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               Container(
